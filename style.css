@@ -17,7 +17,7 @@ body {
 
 /* --- Header & Controls --- */
 .top-bar {
-    position: relative; /* Anchor for absolute centering */
+    position: relative; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -32,12 +32,11 @@ body {
     font-size: 24px;
 }
 
-/* --- Global Resets Section --- */
 .global-resets {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%); /* Dead center */
+    transform: translate(-50%, -50%);
     display: flex;
     gap: 30px;
     background: #1a1a1a;
@@ -74,7 +73,6 @@ body {
     gap: 20px;
 }
 
-/* Color Picker */
 .color-picker {
     display: flex;
     gap: 8px;
@@ -91,11 +89,8 @@ body {
     transition: transform 0.2s;
 }
 
-.color-dot:hover {
-    transform: scale(1.2);
-}
+.color-dot:hover { transform: scale(1.2); }
 
-/* Toggle Switch */
 .toggle-container {
     display: flex;
     align-items: center;
@@ -137,7 +132,101 @@ input:checked + .slider:before { transform: translateX(16px); }
     min-width: 60px;
 }
 
-/* --- Grid & Columns --- */
+/* --- Settings Cog & Modal --- */
+.settings-cog {
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s, transform 0.3s ease;
+}
+
+.settings-cog:hover {
+    color: var(--accent-color);
+    transform: rotate(45deg);
+}
+
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000;
+    left: 0; top: 0; 
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid var(--accent-color);
+    width: 350px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+.modal-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    margin-bottom: 15px; 
+    border-bottom: 1px solid #333; 
+    padding-bottom: 10px;
+}
+
+.modal-header h2 { margin: 0; font-size: 16px; color: var(--text-light); }
+
+.close-modal {
+    color: var(--text-muted); 
+    font-size: 24px; 
+    cursor: pointer;
+}
+.close-modal:hover { color: var(--text-light); }
+
+.boss-alert-item {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 8px 0; 
+    border-bottom: 1px solid #222;
+}
+
+.boss-alert-item:last-child { border-bottom: none; }
+.boss-alert-name { font-size: 13px; color: var(--text-light); }
+.settings-toggles { display: flex; gap: 15px; }
+
+.modal-body {
+    max-height: 50vh; 
+    overflow-y: auto; 
+    padding-right: 10px;
+}
+
+.modal-body::-webkit-scrollbar { width: 6px; }
+.modal-body::-webkit-scrollbar-track { background: var(--card-inner); border-radius: 4px; }
+.modal-body::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+.modal-body::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
+.volume-container { display: flex; flex-direction: column; gap: 10px; }
+.volume-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-light); }
+#volume-slider { width: 100%; accent-color: var(--accent-color); cursor: pointer; }
+
+.test-btn {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+    align-self: flex-start;
+    transition: background 0.2s, color 0.2s;
+}
+.test-btn:hover { background-color: var(--accent-color); color: var(--bg-dark); }
+
+/* --- Grid & Cards --- */
 .timers-grid {
     display: flex;
     gap: 20px;
@@ -157,7 +246,6 @@ input:checked + .slider:before { transform: translateX(16px); }
     font-weight: 500;
 }
 
-/* --- Boss Cards --- */
 .boss-card {
     background-color: var(--card-bg);
     border: 1px solid var(--accent-color);
@@ -167,17 +255,8 @@ input:checked + .slider:before { transform: translateX(16px); }
     border-left: 3px solid var(--accent-color); 
 }
 
-.boss-name {
-    font-weight: 600;
-    font-size: 15px;
-    margin: 0 0 5px 0;
-}
-
-.boss-time {
-    color: var(--text-muted);
-    font-size: 12px;
-    margin: 0 0 15px 0;
-}
+.boss-name { font-weight: 600; font-size: 15px; margin: 0 0 5px 0; }
+.boss-time { color: var(--text-muted); font-size: 12px; margin: 0 0 15px 0; }
 
 .countdown-wrapper {
     background-color: var(--card-inner);
@@ -186,242 +265,76 @@ input:checked + .slider:before { transform: translateX(16px); }
     text-align: center;
 }
 
-.countdown {
-    color: var(--accent-color);
-    font-weight: bold;
-    font-size: 16px;
-}
+.countdown { color: var(--accent-color); font-weight: bold; font-size: 16px; }
+.countdown.spawning { color: #ff0000 !important; font-weight: 800; }
 
-/* --- Dimmed State (For past spawns) --- */
 .boss-card.dimmed {
     border: 1px solid #222;
     border-left: 3px solid #333;
     opacity: 0.4;
 }
-.boss-card.dimmed .countdown {
-    color: var(--text-muted);
-}
+.boss-card.dimmed .countdown { color: var(--text-muted); }
 
-.countdown.spawning {
-    color: #ff0000 !important;
-    font-weight: 800;
-}
-
-/* --- Monarch Specific Styles --- */
-.time-since-kill {
-    color: var(--accent-color);
-    font-size: 12px;
-    margin: 0 0 15px 0;
-}
-
+/* --- Monarch Specifics --- */
+.time-since-kill { color: var(--accent-color); font-size: 12px; margin: 0 0 15px 0; }
 .estimated-label {
-    color: var(--text-muted);
-    font-size: 10px;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-    letter-spacing: 1px;
+    color: var(--text-muted); font-size: 10px; text-transform: uppercase;
+    margin-bottom: 5px; letter-spacing: 1px;
 }
 
-/* Compressed State */
 .boss-card.dimmed .countdown-wrapper, 
 .boss-card.dimmed .time-since-kill,
-.boss-card.dimmed .estimated-label {
-    display: none;
-}
+.boss-card.dimmed .estimated-label { display: none; }
+.boss-card.dimmed .boss-name { margin: 0 0 4px 0; font-size: 14px; color: #888; }
+.boss-card.dimmed .boss-time { margin: 0; font-size: 12px; color: #666; }
 
-.boss-card.dimmed .boss-name {
-    margin: 0 0 4px 0;
-    font-size: 14px;
-    color: #888;
-}
-
-.boss-card.dimmed .boss-time {
-    margin: 0;
-    font-size: 12px;
-    color: #666;
-}
-
-/* --- Global Monarch Dropdown --- */
 .monarch-dropdown {
-    margin-top: 15px;
-    background-color: var(--card-bg);
-    border: 1px solid #222;
-    border-radius: 4px;
-    padding: 10px 15px;
+    margin-top: 15px; background-color: var(--card-bg);
+    border: 1px solid #222; border-radius: 4px; padding: 10px 15px;
 }
-
 .monarch-dropdown summary {
-    color: var(--text-muted);
-    font-size: 12px;
-    text-transform: uppercase;
-    cursor: pointer;
-    text-align: center;
-    list-style: none;
-    transition: color 0.2s;
-    font-weight: 600;
+    color: var(--text-muted); font-size: 12px; text-transform: uppercase;
+    cursor: pointer; text-align: center; list-style: none;
+    transition: color 0.2s; font-weight: 600;
 }
-
-.monarch-dropdown summary::-webkit-details-marker {
-    display: none; 
-}
-
-.monarch-dropdown summary:hover {
-    color: var(--accent-color);
-}
+.monarch-dropdown summary::-webkit-details-marker { display: none; }
+.monarch-dropdown summary:hover { color: var(--accent-color); }
 
 .schedule-list {
-    margin-top: 10px;
-    border-top: 1px solid #333;
-    padding-top: 10px;
-    padding-right: 10px; /* Creates a buffer zone so the text isn't covered */
-    max-height: 200px;
-    overflow-y: auto;
+    margin-top: 10px; border-top: 1px solid #333; padding-top: 10px;
+    padding-right: 10px; max-height: 200px; overflow-y: auto;
 }
-
-/* --- Custom Dark Theme Scrollbar --- */
-.schedule-list::-webkit-scrollbar {
-    width: 6px; /* Makes the scrollbar sleek and thin */
-}
-
-.schedule-list::-webkit-scrollbar-track {
-    background: var(--card-inner); 
-    border-radius: 4px;
-}
-
-.schedule-list::-webkit-scrollbar-thumb {
-    background: #444; 
-    border-radius: 4px;
-}
-
-.schedule-list::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-color); /* Matches your active theme color on hover */
-}
+.schedule-list::-webkit-scrollbar { width: 6px; }
+.schedule-list::-webkit-scrollbar-track { background: var(--card-inner); border-radius: 4px; }
+.schedule-list::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+.schedule-list::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
 
 .schedule-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    font-size: 11px;
-    color: var(--text-muted);
-    border-bottom: 1px solid #222;
+    display: flex; justify-content: space-between; padding: 4px 0;
+    font-size: 11px; color: var(--text-muted); border-bottom: 1px solid #222;
+}
+.schedule-row:last-child { border-bottom: none; }
+
+/* --- Overlay Mode Widget --- */
+#overlay-container {
+    display: flex; justify-content: center; align-items: center;
+    width: 100%; margin-top: 50px;
 }
 
-.schedule-row:last-child {
-    border-bottom: none;
+#overlay-widget {
+    background: rgba(17, 17, 17, 0.85);
+    border: 1px solid #333;
+    border-left: 4px solid var(--accent-color);
+    padding: 20px 40px; border-radius: 8px;
+    text-align: center; backdrop-filter: blur(5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    min-width: 250px;
 }
 
-/* --- Settings Cog --- */
-.settings-cog {
-    color: var(--text-muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: color 0.2s, transform 0.3s ease;
+.overlay-region {
+    font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;
 }
-
-.settings-cog:hover {
-    color: var(--accent-color);
-    transform: rotate(45deg); /* Cool spinning effect */
-}
-
-/* --- Modal Styles --- */
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1000;
-    left: 0; top: 0; 
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.7);
-    backdrop-filter: blur(3px); /* Blurs the background */
-}
-
-.modal-content {
-    background-color: var(--card-bg);
-    margin: 10% auto;
-    padding: 20px;
-    border: 1px solid var(--accent-color);
-    width: 350px;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-}
-
-.modal-header {
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    margin-bottom: 10px; 
-    border-bottom: 1px solid #333; 
-    padding-bottom: 10px;
-}
-
-.modal-header h2 { margin: 0; font-size: 16px; color: var(--text-light); }
-
-.close-modal {
-    color: var(--text-muted); 
-    font-size: 24px; 
-    cursor: pointer;
-}
-
-.close-modal:hover { color: var(--text-light); }
-
-.boss-alert-item {
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    padding: 8px 0; 
-    border-bottom: 1px solid #222;
-}
-
-.boss-alert-item:last-child { border-bottom: none; }
-.boss-alert-name { font-size: 13px; color: var(--text-light); }
-
-.modal-body {
-    max-height: 50vh; 
-    overflow-y: auto; 
-    padding-right: 10px;
-}
-
-/* Modal Scrollbar */
-.modal-body::-webkit-scrollbar { width: 6px; }
-.modal-body::-webkit-scrollbar-track { background: var(--card-inner); border-radius: 4px; }
-.modal-body::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-.modal-body::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
-
-/* --- Volume Slider & Test Button --- */
-.volume-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.volume-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--text-light);
-}
-
-#volume-slider {
-    width: 100%;
-    accent-color: var(--accent-color); /* Automatically matches your chosen color! */
-    cursor: pointer;
-}
-
-.test-btn {
-    background-color: transparent;
-    color: var(--accent-color);
-    border: 1px solid var(--accent-color);
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 11px;
-    text-transform: uppercase;
-    font-weight: 600;
-    align-self: flex-start;
-    transition: background 0.2s, color 0.2s;
-}
-
-.test-btn:hover {
-    background-color: var(--accent-color);
-    color: var(--bg-dark);
-}
+.overlay-boss { font-size: 22px; font-weight: bold; color: var(--text-light); margin: 0 0 10px 0; }
+.overlay-countdown { font-size: 32px; color: var(--accent-color); font-weight: bold; font-family: monospace; margin: 0; }
+.overlay-countdown.spawning { color: #ff0000; }
