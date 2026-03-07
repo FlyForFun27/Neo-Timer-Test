@@ -325,16 +325,48 @@ input:checked + .slider:before { transform: translateX(16px); }
     background: rgba(17, 17, 17, 0.85);
     border: 1px solid #333;
     border-left: 4px solid var(--accent-color);
-    padding: 20px 40px; border-radius: 8px;
-    text-align: center; backdrop-filter: blur(5px);
+    padding: 15px 25px; 
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    min-width: 250px;
+    min-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.overlay-region {
-    font-size: 11px; color: var(--text-muted);
-    text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;
+.overlay-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 120px; /* Aligns region, boss, and timer cleanly */
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 12px;
 }
-.overlay-boss { font-size: 22px; font-weight: bold; color: var(--text-light); margin: 0 0 10px 0; }
-.overlay-countdown { font-size: 32px; color: var(--accent-color); font-weight: bold; font-family: monospace; margin: 0; }
-.overlay-countdown.spawning { color: #ff0000; }
+
+.overlay-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.overlay-region-name { 
+    font-size: 10px; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+}
+
+.overlay-boss-name { 
+    font-size: 16px; 
+    font-weight: bold; 
+    color: var(--text-light); 
+}
+
+.overlay-timer { 
+    font-size: 18px; 
+    color: var(--accent-color); 
+    font-weight: bold; 
+    font-family: monospace; 
+    text-align: right; 
+}
+
+.overlay-timer.spawning { color: #ff0000; }
