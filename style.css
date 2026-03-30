@@ -17,7 +17,7 @@ body {
 
 /* --- Header & Controls --- */
 .top-bar {
-    position: relative; /* Anchor for absolute centering */
+    position: relative; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -37,7 +37,7 @@ body {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%); /* Dead center */
+    transform: translate(-50%, -50%); 
     display: flex;
     gap: 30px;
     background: #1a1a1a;
@@ -208,10 +208,50 @@ input:checked + .slider:before { transform: translateX(16px); }
 }
 
 /* --- Monarch Specific Styles --- */
+.monarch-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    background: var(--card-inner);
+    padding: 8px 10px;
+    border-radius: 4px;
+    border: 1px solid #333;
+}
+
+.monarch-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.monarch-time-input {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: monospace;
+    font-size: 13px;
+    outline: none;
+    color-scheme: dark;
+}
+
+.monarch-time-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(1);
+    opacity: 0.6;
+}
+
+.monarch-time-input:focus {
+    box-shadow: 0 0 5px rgba(76, 201, 240, 0.4);
+}
+
 .time-since-kill {
     color: var(--accent-color);
     font-size: 12px;
-    margin: 0 0 15px 0;
+    margin: 0 0 10px 0;
+    text-align: center;
 }
 
 .estimated-label {
@@ -220,94 +260,6 @@ input:checked + .slider:before { transform: translateX(16px); }
     text-transform: uppercase;
     margin-bottom: 5px;
     letter-spacing: 1px;
-}
-
-/* Compressed State */
-.boss-card.dimmed .countdown-wrapper, 
-.boss-card.dimmed .time-since-kill,
-.boss-card.dimmed .estimated-label {
-    display: none;
-}
-
-.boss-card.dimmed .boss-name {
-    margin: 0 0 4px 0;
-    font-size: 14px;
-    color: #888;
-}
-
-.boss-card.dimmed .boss-time {
-    margin: 0;
-    font-size: 12px;
-    color: #666;
-}
-
-/* --- Global Monarch Dropdown --- */
-.monarch-dropdown {
-    margin-top: 15px;
-    background-color: var(--card-bg);
-    border: 1px solid #222;
-    border-radius: 4px;
-    padding: 10px 15px;
-}
-
-.monarch-dropdown summary {
-    color: var(--text-muted);
-    font-size: 12px;
-    text-transform: uppercase;
-    cursor: pointer;
-    text-align: center;
-    list-style: none;
-    transition: color 0.2s;
-    font-weight: 600;
-}
-
-.monarch-dropdown summary::-webkit-details-marker {
-    display: none; 
-}
-
-.monarch-dropdown summary:hover {
-    color: var(--accent-color);
-}
-
-.schedule-list {
-    margin-top: 10px;
-    border-top: 1px solid #333;
-    padding-top: 10px;
-    padding-right: 10px; /* Creates a buffer zone so the text isn't covered */
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-/* --- Custom Dark Theme Scrollbar --- */
-.schedule-list::-webkit-scrollbar {
-    width: 6px; /* Makes the scrollbar sleek and thin */
-}
-
-.schedule-list::-webkit-scrollbar-track {
-    background: var(--card-inner); 
-    border-radius: 4px;
-}
-
-.schedule-list::-webkit-scrollbar-thumb {
-    background: #444; 
-    border-radius: 4px;
-}
-
-.schedule-list::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-color); /* Matches your active theme color on hover */
-}
-
-.schedule-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    font-size: 11px;
-    color: var(--text-muted);
-    border-bottom: 1px solid #222;
-}
-
-.schedule-row:last-child {
-    border-bottom: none;
 }
 
 /* --- Settings Cog --- */
@@ -321,7 +273,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 
 .settings-cog:hover {
     color: var(--accent-color);
-    transform: rotate(45deg); /* Cool spinning effect */
+    transform: rotate(45deg); 
 }
 
 /* --- Modal Styles --- */
@@ -332,7 +284,7 @@ input:checked + .slider:before { transform: translateX(16px); }
     left: 0; top: 0; 
     width: 100%; height: 100%;
     background-color: rgba(0,0,0,0.7);
-    backdrop-filter: blur(3px); /* Blurs the background */
+    backdrop-filter: blur(3px); 
 }
 
 .modal-content {
@@ -403,7 +355,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 
 #volume-slider {
     width: 100%;
-    accent-color: var(--accent-color); /* Automatically matches your chosen color! */
+    accent-color: var(--accent-color); 
     cursor: pointer;
 }
 
