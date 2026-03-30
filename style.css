@@ -234,13 +234,12 @@ input:checked + .slider:before { transform: translateX(16px); }
     font-family: monospace;
     font-size: 13px;
     outline: none;
-    color-scheme: dark;
+    width: 60px;
+    text-align: center;
 }
 
-.monarch-time-input::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    filter: invert(1);
-    opacity: 0.6;
+.monarch-time-input::placeholder {
+    color: #555;
 }
 
 .monarch-time-input:focus {
