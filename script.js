@@ -288,26 +288,22 @@ function buildMonarchColumn(grid) {
 
     grid.appendChild(col);
 
-    // Event Listener listening ONLY for Enter or clicking away
     document.querySelectorAll('.monarch-time-input').forEach(input => {
         input.addEventListener('change', (e) => {
             const bName = e.target.dataset.boss;
             const bTime = e.target.value.trim();
             
-            // Allow user to clear the field to reset it
             if (bTime === "") {
                 let currentKills = JSON.parse(localStorage.getItem('neoMonarchKills')) || {};
                 currentKills[bName] = "";
                 localStorage.setItem('neoMonarchKills', JSON.stringify(currentKills));
-                tick(); // Update immediately
+                tick(); 
                 return;
             }
 
-            // Validate that they typed a real 24h time (e.g. 14:30)
             const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
             if (!timeRegex.test(bTime)) {
                 alert("Please enter a valid 24h time (e.g., 08:30 or 14:45)");
-                // Revert to the last successfully saved time
                 const currentKills = JSON.parse(localStorage.getItem('neoMonarchKills')) || {};
                 e.target.value = currentKills[bName] || "";
                 return;
@@ -317,7 +313,7 @@ function buildMonarchColumn(grid) {
             currentKills[bName] = bTime;
             localStorage.setItem('neoMonarchKills', JSON.stringify(currentKills));
             
-            tick(); // Update immediately
+            tick(); 
         });
     });
 }
@@ -376,7 +372,6 @@ function updateTimers(nowSec, activeOffset) {
         card.classList.remove('dimmed');
         countdownEl.classList.remove('spawning');
 
-        // Only process math if a time has actually been entered
         if (!killTimeStr) {
             killTimerEl.innerText = "--";
             countdownEl.innerText = "Awaiting Time";
@@ -411,9 +406,11 @@ function updateTimers(nowSec, activeOffset) {
         handleAudio(timeRemaining, isGlobalSoundOn, mutedRegions, "Monarch", spawnId);
     });
 
-    // Sort Containers based on priority
+    // Sort Containers based on priority (WITH SMART SORT FIX)
     document.querySelectorAll('.card-container').forEach(container => {
         const cards = Array.from(container.children);
+        const originalOrder = [...cards];
+
         cards.sort((a, b) => {
             const priorityA = parseInt(a.dataset.priority || "9");
             const priorityB = parseInt(b.dataset.priority || "9");
@@ -424,7 +421,20 @@ function updateTimers(nowSec, activeOffset) {
             const tB = parseInt(b.dataset.targetSec || "0");
             return tA - tB;
         });
-        cards.forEach(card => container.appendChild(card));
+
+        // Check if the sorted order actually differs from the current DOM order
+        let orderChanged = false;
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i] !== originalOrder[i]) {
+                orderChanged = true;
+                break;
+            }
+        }
+
+        // Only append to the DOM if necessary, preventing focus loss
+        if (orderChanged) {
+            cards.forEach(card => container.appendChild(card));
+        }
     });
 }
 
