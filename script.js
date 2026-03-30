@@ -1,5 +1,14 @@
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRlBFHRViiLrjzmlEvxgI8-1UNwfrJWJU7fsej4eO6dLOEEzozvd_03KmgWhAIZonrzb2QupMcvVK/pub?gid=0&single=true&output=csv";
 
+// --- DECOUPLED MONARCH SETTINGS ---
+// Easily edit this array to change which bosses appear in the manual Monarch column
+const MONARCH_BOSSES = [
+    "Pinchy",
+    "Lycan",
+    "Profane Jiangshi",
+    "King Giganura"
+];
+
 // Global Variables
 window.globalCsvData = null;
 window.currentDayOffset = null;
@@ -120,7 +129,15 @@ function populateSettings() {
     const list = document.getElementById('region-alert-list');
     if (!window.globalCsvData) return;
     
-    const regionNames = [...new Set(window.globalCsvData.map(b => b.Region))].filter(Boolean).sort();
+    // Remove Monarch from the settings list since it's decoupled now
+    const regionNames = [...new Set(window.globalCsvData.map(b => b.Region))]
+        .filter(Boolean)
+        .filter(r => r.toLowerCase() !== 'monarch')
+        .sort();
+        
+    // Manually push Monarch back in so users can mute the local Monarch column
+    regionNames.push("Monarch");
+
     let mutedRegions = JSON.parse(localStorage.getItem('neoTimerMutedRegions')) || [];
 
     list.innerHTML = regionNames.map(name => `
@@ -174,6 +191,7 @@ function tick() {
 
 function getActiveDayOffset(data, nowSec, now) {
     const todayStr = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(now);
+    // Ignore CSV Monarchs entirely
     const todaysStandardBosses = data.filter(row => row.Weekday === todayStr && row.Region && row.Region.toLowerCase() !== 'monarch');
     const hasActiveBosses = todaysStandardBosses.some(boss => (boss.TargetSec + 300) > nowSec);
     return hasActiveBosses ? 0 : 1; 
@@ -181,7 +199,7 @@ function getActiveDayOffset(data, nowSec, now) {
 
 // --- CLOCKS & RESETS ---
 function updateTopClock(now, nowSec) {
-    document.getElementById('top-clock').innerText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    document.getElementById('top-clock').innerText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false });
     
     let dDiff = 21600 - nowSec; 
     if (dDiff <= 0) dDiff += 86400;
@@ -208,75 +226,89 @@ function buildDashboard(data, offset, now) {
     targetDate.setDate(targetDate.getDate() + offset);
     const displayDayStr = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(targetDate);
     const isTomorrow = offset > 0;
-    const trueTodayStr = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(now);
 
+    // Filter ONLY standard bosses. Ignore CSV Monarchs entirely.
     const displayStandardBosses = data.filter(row => row.Weekday === displayDayStr && row.Region && row.Region.toLowerCase() !== 'monarch');
-    const trueTodayMonarchs = data.filter(row => row.Weekday === trueTodayStr && row.Region && row.Region.toLowerCase() === 'monarch');
     
-    const combinedData = [...displayStandardBosses, ...trueTodayMonarchs];
-    const activeRegions = [...new Set(combinedData.map(row => row.Region))];
+    const activeRegions = [...new Set(displayStandardBosses.map(row => row.Region))];
 
+    // Build Standard Columns
     activeRegions.forEach(region => {
         const col = document.createElement('div');
         col.className = 'region-column';
         
-        const titleExtra = (isTomorrow && region.toLowerCase() !== 'monarch') 
-            ? ` <span style="font-size:10px; color:var(--accent-color);">(Tomorrow)</span>` 
-            : ``;
-
+        const titleExtra = isTomorrow ? ` <span style="font-size:10px; color:var(--accent-color);">(Tomorrow)</span>` : ``;
         col.innerHTML = `<h3>${region.toUpperCase()}${titleExtra}</h3><div class="card-container"></div>`;
         const container = col.querySelector('.card-container');
         
-        const regionBosses = combinedData.filter(row => row.Region === region);
+        const regionBosses = displayStandardBosses.filter(row => row.Region === region);
         
         regionBosses.forEach(boss => {
             const card = document.createElement('div');
-            card.className = 'boss-card';
-            
+            card.className = 'boss-card standard-card';
             card.dataset.targetSec = boss.TargetSec; 
             card.dataset.targetTime = boss.TargetTime;
             card.dataset.bossName = boss.BossName; 
             card.dataset.region = boss.Region; 
 
-            if (region.toLowerCase() === 'monarch') {
-                card.classList.add('monarch-card');
-                card.innerHTML = `
-                    <p class="boss-name">${boss.BossName}</p>
-                    <p class="time-since-kill">Time since kill: <span class="kill-timer">--</span></p>
-                    <div class="countdown-wrapper">
-                        <div class="estimated-label">ESTIMATED SPAWN IN</div>
-                        <div class="countdown">--</div>
-                    </div>`;
-            } else {
-                card.innerHTML = `
-                    <p class="boss-name">${boss.BossName}</p>
-                    <p class="boss-time">Time: ${boss.TargetTime}</p>
-                    <div class="countdown-wrapper"><div class="countdown">--</div></div>`;
-            }
+            card.innerHTML = `
+                <p class="boss-name">${boss.BossName}</p>
+                <p class="boss-time">Time: ${boss.TargetTime}</p>
+                <div class="countdown-wrapper"><div class="countdown">--</div></div>`;
             container.appendChild(card);
         });
 
-        if (region.toLowerCase() === 'monarch') {
-            const dropdown = document.createElement('details');
-            dropdown.className = 'monarch-dropdown';
-            const allMonarchs = data.filter(row => row.Region && row.Region.toLowerCase() === 'monarch');
-            const dayOrder = { "Monday":1, "Tuesday":2, "Wednesday":3, "Thursday":4, "Friday":5, "Saturday":6, "Sunday":7 };
-            
-            allMonarchs.sort((a, b) => {
-                if (dayOrder[a.Weekday] !== dayOrder[b.Weekday]) return dayOrder[a.Weekday] - dayOrder[b.Weekday];
-                return a.TargetSec - b.TargetSec;
-            });
-
-            let listHTML = '';
-            allMonarchs.forEach(row => {
-                listHTML += `<div class="schedule-row"><span>${row.Weekday}, ${row.BossName}</span> <span>${row.TargetTime}</span></div>`;
-            });
-
-            dropdown.innerHTML = `<summary>View All Logged Times</summary><div class="schedule-list">${listHTML}</div>`;
-            col.appendChild(dropdown);
-        }
-
         grid.appendChild(col);
+    });
+
+    // --- Build Decoupled Monarch Column ---
+    buildMonarchColumn(grid);
+}
+
+function buildMonarchColumn(grid) {
+    const col = document.createElement('div');
+    col.className = 'region-column';
+    col.innerHTML = `<h3>MONARCHS <span style="font-size:10px; color:var(--accent-color);">(Local)</span></h3><div class="card-container monarch-container"></div>`;
+    const container = col.querySelector('.card-container');
+
+    const savedKills = JSON.parse(localStorage.getItem('neoMonarchKills')) || {};
+
+    MONARCH_BOSSES.forEach(bossName => {
+        const card = document.createElement('div');
+        card.className = 'boss-card monarch-card';
+        card.dataset.bossName = bossName;
+        card.dataset.region = "Monarch"; 
+
+        const savedTime = savedKills[bossName] || "";
+
+        card.innerHTML = `
+            <p class="boss-name">${bossName}</p>
+            <div class="monarch-controls">
+                <span class="monarch-label">Last Kill Time:</span>
+                <input type="time" class="monarch-time-input" data-boss="${bossName}" value="${savedTime}">
+            </div>
+            <p class="time-since-kill">Time since kill: <span class="kill-timer">--</span></p>
+            <div class="countdown-wrapper">
+                <div class="estimated-label">ESTIMATED SPAWN IN</div>
+                <div class="countdown">--</div>
+            </div>`;
+        container.appendChild(card);
+    });
+
+    grid.appendChild(col);
+
+    // Event Listener for saving kill times
+    document.querySelectorAll('.monarch-time-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const bName = e.target.dataset.boss;
+            const bTime = e.target.value;
+            
+            let currentKills = JSON.parse(localStorage.getItem('neoMonarchKills')) || {};
+            currentKills[bName] = bTime;
+            localStorage.setItem('neoMonarchKills', JSON.stringify(currentKills));
+            
+            tick(); // Force immediate recount
+        });
     });
 }
 
@@ -289,8 +321,8 @@ function updateTimers(nowSec, activeOffset) {
     const isGlobalSoundOn = soundToggle ? soundToggle.checked : false;
     const mutedRegions = JSON.parse(localStorage.getItem('neoTimerMutedRegions')) || [];
 
-    document.querySelectorAll('.boss-card').forEach(card => {
-        const isMonarch = card.classList.contains('monarch-card');
+    // Update Standard Bosses
+    document.querySelectorAll('.standard-card').forEach(card => {
         const countdownEl = card.querySelector('.countdown');
         const targetSec = parseInt(card.dataset.targetSec, 10);
         const bName = card.dataset.bossName;
@@ -302,72 +334,101 @@ function updateTimers(nowSec, activeOffset) {
         card.classList.remove('dimmed');
         countdownEl.classList.remove('spawning');
 
-        // --- NEW MONARCH MATH LOGIC ---
-        if (isMonarch) {
-            const killTimerEl = card.querySelector('.kill-timer');
-            let timeSinceKill = nowSec - targetSec;
-            if (timeSinceKill < 0) timeSinceKill += 86400; 
-            
-            if (killTimerEl) killTimerEl.innerText = formatDuration(timeSinceKill * 1000);
-            
-            // 7200 sec = 2 hours, 18000 sec = 5 hours
-            const spawnIn = 7200 - timeSinceKill; 
-            timeRemaining = spawnIn; 
-            
-            if (spawnIn > 0) {
-                // Counting down to the 2-hour mark
-                countdownEl.innerText = formatDuration(spawnIn * 1000);
-                card.dataset.priority = "1";
-            } else if (timeSinceKill <= 18000) { 
-                // Between 2h and 5h
-                countdownEl.innerText = `In Window`;
-                countdownEl.classList.add('spawning'); // Turns it Red
-                card.dataset.priority = "0"; // Pushes to the top
-            } else { 
-                // Past 5h mark
-                countdownEl.innerText = `Missed`;
-                card.dataset.priority = "2"; // Sinks it to the bottom
-                timeRemaining = 999999; // Prevents audio from triggering
-            }
+        const diffSec = (targetSec + (86400 * activeOffset)) - nowSec;
+        timeRemaining = diffSec; 
 
-        // --- STANDARD BOSS LOGIC ---
+        if (diffSec > 0) {
+            countdownEl.innerText = isTimerOn ? formatDuration(diffSec * 1000) : `Announcement at: ${card.dataset.targetTime}`;
+            card.dataset.priority = "1";
+        } else if (diffSec <= 0 && diffSec > -300) { 
+            countdownEl.innerText = `Spawning in: ${formatDuration((300 + diffSec) * 1000)}`;
+            countdownEl.classList.add('spawning');
+            card.dataset.priority = "0";
         } else {
-            const diffSec = (targetSec + (86400 * activeOffset)) - nowSec;
-            timeRemaining = diffSec; 
-
-            if (diffSec > 0) {
-                countdownEl.innerText = isTimerOn ? formatDuration(diffSec * 1000) : `Announcement at: ${card.dataset.targetTime}`;
-                card.dataset.priority = "1";
-            } else if (diffSec <= 0 && diffSec > -300) { 
-                countdownEl.innerText = `Spawning in: ${formatDuration((300 + diffSec) * 1000)}`;
-                countdownEl.classList.add('spawning');
-                card.dataset.priority = "0";
-            } else {
-                countdownEl.innerText = `Spawned`;
-                card.classList.add('dimmed');
-                card.dataset.priority = "2";
-            }
+            countdownEl.innerText = `Spawned`;
+            card.classList.add('dimmed');
+            card.dataset.priority = "2";
         }
 
-        // --- AUDIO TRIGGER ---
-        if (timeRemaining <= 300 && timeRemaining > -300) {
-            if (isGlobalSoundOn && !mutedRegions.includes(regionName) && !window.notifiedBosses.has(spawnId)) {
-                alertAudio.play().catch(e => console.log("Audio play blocked by browser."));
-                window.notifiedBosses.add(spawnId); 
-            }
-        } else if (timeRemaining > 300) {
-            window.notifiedBosses.delete(spawnId);
-        }
+        handleAudio(timeRemaining, isGlobalSoundOn, mutedRegions, regionName, spawnId);
     });
 
+    // Update Monarch Bosses
+    document.querySelectorAll('.monarch-card').forEach(card => {
+        const countdownEl = card.querySelector('.countdown');
+        const killTimerEl = card.querySelector('.kill-timer');
+        const inputEl = card.querySelector('.monarch-time-input');
+        const bName = card.dataset.bossName;
+        
+        const killTimeStr = inputEl.value;
+        const spawnId = `Monarch_${bName}`;
+        
+        card.classList.remove('dimmed');
+        countdownEl.classList.remove('spawning');
+
+        if (!killTimeStr) {
+            killTimerEl.innerText = "--";
+            countdownEl.innerText = "Awaiting Time";
+            card.dataset.priority = "3";
+            return;
+        }
+
+        const [kh, km] = killTimeStr.split(':').map(Number);
+        const killSec = (kh * 3600) + (km * 60);
+
+        let timeSinceKill = nowSec - killSec;
+        // If the inputted time is physically larger than current time, 
+        // it means the boss was killed yesterday. Wrap around.
+        if (timeSinceKill < 0) timeSinceKill += 86400; 
+
+        killTimerEl.innerText = formatDuration(timeSinceKill * 1000);
+        
+        const spawnIn = 7200 - timeSinceKill; 
+        let timeRemaining = spawnIn;
+
+        if (spawnIn > 0) {
+            countdownEl.innerText = formatDuration(spawnIn * 1000);
+            card.dataset.priority = "1";
+        } else if (timeSinceKill <= 18000) { // Up to 5 hours
+            countdownEl.innerText = `In Window`;
+            countdownEl.classList.add('spawning'); 
+            card.dataset.priority = "0"; 
+        } else { 
+            countdownEl.innerText = `Missed Window`;
+            card.dataset.priority = "2"; 
+            timeRemaining = 999999; // Prevents audio
+        }
+
+        handleAudio(timeRemaining, isGlobalSoundOn, mutedRegions, "Monarch", spawnId);
+    });
+
+    // Sort Containers based on priority
     document.querySelectorAll('.card-container').forEach(container => {
         const cards = Array.from(container.children);
         cards.sort((a, b) => {
-            if (a.dataset.priority !== b.dataset.priority) return a.dataset.priority - b.dataset.priority;
-            return parseInt(a.dataset.targetSec) - parseInt(b.dataset.targetSec);
+            const priorityA = parseInt(a.dataset.priority || "9");
+            const priorityB = parseInt(b.dataset.priority || "9");
+            
+            if (priorityA !== priorityB) return priorityA - priorityB;
+            
+            // Secondary sort: time remaining for standard cards
+            const tA = parseInt(a.dataset.targetSec || "0");
+            const tB = parseInt(b.dataset.targetSec || "0");
+            return tA - tB;
         });
         cards.forEach(card => container.appendChild(card));
     });
+}
+
+function handleAudio(timeRemaining, isGlobalSoundOn, mutedRegions, regionName, spawnId) {
+    if (timeRemaining <= 300 && timeRemaining > -300) {
+        if (isGlobalSoundOn && !mutedRegions.includes(regionName) && !window.notifiedBosses.has(spawnId)) {
+            alertAudio.play().catch(e => console.log("Audio play blocked by browser."));
+            window.notifiedBosses.add(spawnId); 
+        }
+    } else if (timeRemaining > 300) {
+        window.notifiedBosses.delete(spawnId);
+    }
 }
 
 function formatDuration(ms) {
