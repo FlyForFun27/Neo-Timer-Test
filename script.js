@@ -1,7 +1,6 @@
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRlBFHRViiLrjzmlEvxgI8-1UNwfrJWJU7fsej4eO6dLOEEzozvd_03KmgWhAIZonrzb2QupMcvVK/pub?gid=0&single=true&output=csv";
 
 // --- DECOUPLED MONARCH SETTINGS ---
-// Easily edit this array to change which bosses appear in the manual Monarch column
 const MONARCH_BOSSES = [
     "Monarch CH 1",
     "Monarch CH 2",
@@ -259,7 +258,8 @@ function buildDashboard(data, offset, now) {
 function buildMonarchColumn(grid) {
     const col = document.createElement('div');
     col.className = 'region-column';
-    col.innerHTML = `<h3>MONARCHS <span style="font-size:10px; color:var(--accent-color);">(Local)</span></h3><div class="card-container monarch-container"></div>`;
+    // This is the line that was changed:
+    col.innerHTML = `<h3>MONARCHS <span style="font-size:10px; color:var(--accent-color);">(Server-Time)</span></h3><div class="card-container monarch-container"></div>`;
     const container = col.querySelector('.card-container');
 
     const savedKills = JSON.parse(localStorage.getItem('neoMonarchKills')) || {};
@@ -422,7 +422,6 @@ function updateTimers(nowSec, activeOffset) {
             return tA - tB;
         });
 
-        // Check if the sorted order actually differs from the current DOM order
         let orderChanged = false;
         for (let i = 0; i < cards.length; i++) {
             if (cards[i] !== originalOrder[i]) {
@@ -431,7 +430,6 @@ function updateTimers(nowSec, activeOffset) {
             }
         }
 
-        // Only append to the DOM if necessary, preventing focus loss
         if (orderChanged) {
             cards.forEach(card => container.appendChild(card));
         }
